@@ -51,21 +51,21 @@ parse_hand = |str|
                     Err(KeyNotFound) -> Dict.insert(cards, c, 1),
         )
         |> Dict.to_list
-        |> List.walk(
-            HighCard(hand_str),
-            |type, (_, count)|
-                when (type, count) is
-                    (HighCard(_), 5) -> FiveOfAKind(hand_str)
-                    (HighCard(_), 4) -> FourOfAKind(hand_str)
-                    (HighCard(_), 3) -> ThreeOfAKind(hand_str)
-                    (HighCard(_), 2) -> OnePair(hand_str)
-                    (HighCard(_), 1) -> HighCard(hand_str)
-                    (OnePair(_), 3) -> FullHouse(hand_str)
-                    (OnePair(_), 2) -> TwoPair(hand_str)
-                    (ThreeOfAKind(_), 2) -> FullHouse(hand_str)
-                    _ -> type,
-        )
+        |> List.walk(HighCard(hand_str), |type, (_, count)| transform_hand(type, count))
     Ok((hand, bid))
+
+transform_hand : Hand, U8 -> Hand
+transform_hand = |hand, count|
+    when (hand, count) is
+        (HighCard(s), 5) -> FiveOfAKind(s)
+        (HighCard(s), 4) -> FourOfAKind(s)
+        (HighCard(s), 3) -> ThreeOfAKind(s)
+        (HighCard(s), 2) -> OnePair(s)
+        (HighCard(s), 1) -> HighCard(s)
+        (OnePair(s), 3) -> FullHouse(s)
+        (OnePair(s), 2) -> TwoPair(s)
+        (ThreeOfAKind(s), 2) -> FullHouse(s)
+        _ -> hand
 
 compare_hand_bets : (Hand, U64), (Hand, U64) -> [LT, EQ, GT]
 compare_hand_bets = |(h1, _), (h2, _)|
@@ -136,7 +136,7 @@ parse_joker_hand : Str -> Result (Hand, U64) [InvalidHand Str, InvalidBid Str]
 parse_joker_hand = |str|
     { before: hand_str, after: bid_str } = Str.split_first(str, " ") ? |_| InvalidHand(str)
     bid = Str.to_u64(bid_str) ? |_| InvalidBid(bid_str)
-    hand =
+    hand_with_jokers =
         Str.to_utf8(hand_str)
         |> List.walk(
             Dict.empty({}),
@@ -148,30 +148,21 @@ parse_joker_hand = |str|
         |> Dict.to_list
         |> List.walk(
             { hand: HighCard(hand_str), jokers: 0 },
-            |undetermined, (c, count)|
+            |hj, (c, count)|
                 if c == 'J' then
-                    { undetermined & jokers: count }
+                    { hj & jokers: count }
                 else
-                    when (undetermined.hand, count) is
-                        (HighCard(_), 5) -> { undetermined & hand: FiveOfAKind(hand_str) }
-                        (HighCard(_), 4) -> { undetermined & hand: FourOfAKind(hand_str) }
-                        (HighCard(_), 3) -> { undetermined & hand: ThreeOfAKind(hand_str) }
-                        (HighCard(_), 2) -> { undetermined & hand: OnePair(hand_str) }
-                        (HighCard(_), 1) -> { undetermined & hand: HighCard(hand_str) }
-                        (OnePair(_), 3) -> { undetermined & hand: FullHouse(hand_str) }
-                        (OnePair(_), 2) -> { undetermined & hand: TwoPair(hand_str) }
-                        (ThreeOfAKind(_), 2) -> { undetermined & hand: FullHouse(hand_str) }
-                        _ -> undetermined,
+                    { hj & hand: transform_hand(hj.hand, count) }
         )
-    Ok((undetermined_hand_to_best_hand(hand), bid))
+    Ok((best_hand(hand_with_jokers), bid))
 
-UndeterminedHand : {
+HandWithJokers : {
     hand : Hand,
     jokers : U8,
 }
 
-undetermined_hand_to_best_hand : UndeterminedHand -> Hand
-undetermined_hand_to_best_hand = |uh|
+best_hand : HandWithJokers -> Hand
+best_hand = |uh|
     when (uh.hand, uh.jokers) is
         (FourOfAKind(s), 1) -> FiveOfAKind(s)
         (ThreeOfAKind(s), 2) -> FiveOfAKind(s)
