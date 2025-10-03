@@ -68,8 +68,7 @@ transform_hand = |hand, count|
         _ -> hand
 
 compare_hand_bets : (Hand, U64), (Hand, U64) -> [LT, EQ, GT]
-compare_hand_bets = |(h1, _), (h2, _)|
-    compare_hands(h1, h2)
+compare_hand_bets = |(h1, _), (h2, _)| compare_hands(h1, h2)
 
 compare_hands : Hand, Hand -> [LT, EQ, GT]
 compare_hands = |h1, h2|
@@ -179,8 +178,7 @@ best_hand = |uh|
         _ -> uh.hand
 
 compare_joker_hand_bets : (Hand, U64), (Hand, U64) -> [LT, EQ, GT]
-compare_joker_hand_bets = |(h1, _), (h2, _)|
-    compare_joker_hands(h1, h2)
+compare_joker_hand_bets = |(h1, _), (h2, _)| compare_joker_hands(h1, h2)
 
 compare_joker_hands : Hand, Hand -> [LT, EQ, GT]
 compare_joker_hands = |h1, h2|
@@ -205,12 +203,4 @@ compare_joker_cards = |c1, c2|
     if r1 == r2 then EQ else if r1 < r2 then LT else GT
 
 rank_joker_card : U8 -> U8
-rank_joker_card = |card|
-    when card is
-        'A' -> 14
-        'K' -> 13
-        'Q' -> 12
-        'T' -> 10
-        c if c >= '2' and c <= '9' -> c - '0'
-        'J' -> 1
-        _ -> 0
+rank_joker_card = |card| if card == 'J' then 1 else rank_card(card)
