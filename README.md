@@ -2,4 +2,4 @@
 
 ## TODO:
 
-**Day 1 and 2 are not completed...**
+**Day 2 is not completed...**

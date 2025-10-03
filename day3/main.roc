@@ -29,9 +29,8 @@ part1 : Str -> Result Str _
 part1 = |s|
     lines = s |> Str.to_utf8 |> List.split_on('\n')
 
-    schematic = parse_schematic(lines)
-
-    extract_part_numbers(schematic, lines)
+    parse_schematic(lines)
+    |> extract_part_numbers(lines)
     |> List.sum
     |> Num.to_str
     |> Ok
@@ -108,7 +107,6 @@ get_adjacent = |number, lines|
                 (l, r)
 
             _ -> ([], [])
-
     below =
         when List.get(lines, number.row + 1) is
             Ok(line_below) ->
@@ -123,19 +121,17 @@ part2 : Str -> Result Str _
 part2 = |s|
     lines = s |> Str.to_utf8 |> List.split_on('\n')
 
-    schematic =
-        parse_schematic(lines)
-        |> List.walk(
-            Dict.empty({}),
-            |sch, n|
-                when Dict.get(sch, n.row) is
-                    Ok(row) -> Dict.insert(sch, n.row, List.append(row, n))
-                    _ -> Dict.insert(sch, n.row, [n]),
-        )
-
-    find_and_sum_ratios(schematic, lines)
+    parse_schematic(lines)
+    |> List.walk(Dict.empty({}), build_row_dict)
+    |> find_and_sum_ratios(lines)
     |> Num.to_str
     |> Ok
+
+build_row_dict : Dict U64 (List { row : U64 }a), { row : U64 }a -> Dict U64 (List { row : U64 }a)
+build_row_dict = |dict, number|
+    when Dict.get(dict, number.row) is
+        Ok(row) -> Dict.insert(dict, number.row, List.append(row, number))
+        _ -> Dict.insert(dict, number.row, [number])
 
 ## Find all gears (exactly 2 numbers adjacent to a '*') and their ratios (product of the two numbers) and sum the ratios
 find_and_sum_ratios : Dict U64 (List { number : U64, row : U64, start : U64, end : U64 }), List (List U8) -> U64

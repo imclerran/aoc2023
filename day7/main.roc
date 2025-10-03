@@ -27,7 +27,7 @@ main! = |_args|
 Hand : [FiveOfAKind Str, FourOfAKind Str, FullHouse Str, ThreeOfAKind Str, TwoPair Str, OnePair Str, HighCard Str]
 
 ## Solve part 1
-part1 : Str -> Result Str _
+part1 : Str -> Result Str [InvalidBid Str, InvalidHand Str]
 part1 = |s|
     Str.trim_end(s)
     |> Str.split_on("\n")
@@ -121,7 +121,7 @@ rank_hand = |hand|
         FiveOfAKind(_) -> 6
 
 ## Solve part 2
-part2 : Str -> Result Str _
+part2 : Str -> Result Str [InvalidBid Str, InvalidHand Str]
 part2 = |s|
     Str.trim_end(s)
     |> Str.split_on("\n")
