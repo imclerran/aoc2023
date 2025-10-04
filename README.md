@@ -1,5 +1,3 @@
 # Advent of Code 2023
 
-## TODO:
-
-**Day 2 is not completed...**
+Advent of Code 2023 solutions in [Roc](https://roc-lang.org/)

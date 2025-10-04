@@ -21,13 +21,13 @@ main! = |_args|
             title: "Trebuchet?!",
             part1,
             part2,
-        }
+        },
     )
 
 ## Solve part 1
 part1 : Str -> Result Str _
 part1 = |s|
-    s 
+    s
     |> Str.split_on("\n")
     |> List.map(extract_digits)
     |> List.keep_oks(compute_calibration)
@@ -48,8 +48,8 @@ compute_calibration = |digits|
 
 ## Solve part 2
 part2 : Str -> Result Str _
-part2 = |s| 
-    s 
+part2 = |s|
+    s
     |> Str.split_on("\n")
     |> List.map(extract_text_digits)
     |> List.keep_oks(compute_calibration)
@@ -61,18 +61,20 @@ extract_text_digits : Str -> List U64
 extract_text_digits = |line|
     bytes = line |> Str.to_utf8
     List.range({ start: At(0), end: Length(List.len(bytes)) })
-    |> List.walk([], |ds, i|
-        when List.drop_first(bytes, i) is
-            ['o', 'n', 'e', ..] -> List.append(ds, 1)
-            ['t', 'w', 'o', ..] -> List.append(ds, 2)
-            ['t', 'h', 'r', 'e', 'e', ..] -> List.append(ds, 3)
-            ['f', 'o', 'u', 'r', ..] -> List.append(ds, 4)
-            ['f', 'i', 'v', 'e', ..] -> List.append(ds, 5)
-            ['s', 'i', 'x', ..] -> List.append(ds, 6)
-            ['s', 'e', 'v', 'e', 'n', ..] -> List.append(ds, 7)
-            ['e', 'i', 'g', 'h', 't', ..] -> List.append(ds, 8)
-            ['n', 'i', 'n', 'e', ..] -> List.append(ds, 9)
-            ['z', 'e', 'r', 'o', ..] -> List.append(ds, 0)
-            [d, ..] if d >= '0' and d <= '9' -> List.append(ds, Num.to_u64(d - '0'))
-            _ -> ds
+    |> List.walk(
+        [],
+        |ds, i|
+            when List.drop_first(bytes, i) is
+                ['o', 'n', 'e', ..] -> List.append(ds, 1)
+                ['t', 'w', 'o', ..] -> List.append(ds, 2)
+                ['t', 'h', 'r', 'e', 'e', ..] -> List.append(ds, 3)
+                ['f', 'o', 'u', 'r', ..] -> List.append(ds, 4)
+                ['f', 'i', 'v', 'e', ..] -> List.append(ds, 5)
+                ['s', 'i', 'x', ..] -> List.append(ds, 6)
+                ['s', 'e', 'v', 'e', 'n', ..] -> List.append(ds, 7)
+                ['e', 'i', 'g', 'h', 't', ..] -> List.append(ds, 8)
+                ['n', 'i', 'n', 'e', ..] -> List.append(ds, 9)
+                ['z', 'e', 'r', 'o', ..] -> List.append(ds, 0)
+                [d, ..] if d >= '0' and d <= '9' -> List.append(ds, Num.to_u64(d - '0'))
+                _ -> ds,
     )
